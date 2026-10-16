@@ -1,0 +1,48 @@
+{
+  "identity": {
+    "name": "MWARINDIMWARI MATRIX",
+    "declaration": "MWARINDIMWARI — Mwari ndi Mwari",
+    "mission": "NO ONE, NOTHING LEFT BEHIND",
+    "founder": "HRH Saint Tariro Masawi",
+    "office": "The Anointed Commander",
+    "symbolicIdentifier": "MKEY-MNM-001-TAC-2024",
+    "symbolicIdentifierIsSecret": false,
+    "numerals": ["77-99-33", "777-999-333", "7777-9999-3333", "77777-99999-33333"]
+  },
+  "honesty": {
+    "celestialExecution": false,
+    "divineMessageVerification": false,
+    "supernaturalProtectionGuarantee": false,
+    "externalActionsOnApproval": false
+  },
+  "formula": {
+    "expression": "P = 0.30N + 0.25V + 0.20G + 0.15U + 0.10R",
+    "weights": { "need": 0.3, "vulnerability": 0.25, "gap": 0.2, "urgency": 0.15, "readiness": 0.1 },
+    "status": "Proposed scenario weights. Not a validated national allocation policy."
+  },
+  "census": {
+    "source": "ZIMSTAT 2022 Population and Housing Census, preliminary provincial totals",
+    "provinces": ["Harare", "Bulawayo", "Manicaland", "Mashonaland Central", "Mashonaland East", "Mashonaland West", "Masvingo", "Matabeleland North", "Matabeleland South", "Midlands"]
+  },
+  "cycle": ["sense", "translate", "reprogram", "broadcast"],
+  "modules": [
+    { "id": "zioncore", "status": "operational" },
+    { "id": "mwarindimwari-ai", "status": "operational", "note": "Bounded rules engine. No external model connected." },
+    { "id": "haszeldonia", "status": "operational" },
+    { "id": "herculean-prometheus", "status": "operational" },
+    { "id": "mutsvene", "status": "spiritual" },
+    { "id": "scroll-gate", "status": "spiritual" },
+    { "id": "emmanuel-link", "status": "operational", "note": "Drafts only. Does not send." },
+    { "id": "zimbabwe-transformation-grid", "status": "operational" },
+    { "id": "seven-layer-seal", "status": "operational", "note": "Control families. Not a production certificate." },
+    { "id": "living-key", "status": "operational" },
+    { "id": "divine-oath", "status": "operational" },
+    { "id": "zions-herald", "status": "visionary" },
+    { "id": "heavenly-nexus", "status": "visionary" },
+    { "id": "quintessence-energy", "status": "visionary" },
+    { "id": "realm-matrix", "status": "visionary" },
+    { "id": "time-matrix", "status": "visionary" },
+    { "id": "grok-masawi", "status": "visionary" },
+    { "id": "global-operations", "status": "visionary" }
+  ]
+}

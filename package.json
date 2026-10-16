@@ -1,0 +1,13 @@
+{
+  "name": "mwarindimwari-matrix",
+  "private": true,
+  "type": "module",
+  "description": "Governed core of the MWARINDIMWARI Matrix. Routine autonomy, scenario scoring, voluntary devotion, and a tamper-evident ledger.",
+  "scripts": {
+    "test": "node --experimental-strip-types --test src/lib/matrix/engine.test.ts"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "license": "MIT"
+}
