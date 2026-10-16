@@ -27,6 +27,7 @@ export function LivingDeck() {
     (a, b) => priorityScore(b.factors) - priorityScore(a.factors),
   );
   const selected = provinces.find((province) => province.id === focus) ?? ranked[0];
+  const protocol = useMatrix((s) => s.protocol);
   const plan = tick > 0 ? planCycle(tick) : null;
   const chain = chainOk === null ? "Arming" : chainOk ? "Intact" : "Review";
 
@@ -40,6 +41,16 @@ export function LivingDeck() {
           reduce={motion === "reduce"}
           onFocus={setFocus}
         />
+        {protocol.length > 0 ? (
+          <ol className="grid grid-cols-2 gap-2 md:grid-cols-4">
+            {protocol.map((step) => (
+              <li key={step.id} className="rounded-lg border border-line bg-panel px-2 py-2">
+                <p className="text-xs font-semibold text-gold">{step.name}</p>
+                <p className="text-xs leading-relaxed text-mist">{step.agent}</p>
+              </li>
+            ))}
+          </ol>
+        ) : null}
         <div className="rail-switch" aria-label="Matrix rails">
           {RAILS.map(([id, label]) => (
             <button

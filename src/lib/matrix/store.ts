@@ -14,9 +14,11 @@ import {
   planCycle,
   priorityScore,
   routineTaskOutcome,
+  runProtocol,
   sealEntry,
   stewardReleaseOutcome,
   verifyChain,
+  counsel,
 } from "./engine";
 import type {
   AuditEntry,
@@ -32,6 +34,7 @@ import type {
   Sector,
   Task,
 } from "./types";
+import type { ProtocolStep } from "./engine";
 
 const LEDGER_CAP = 120;
 
@@ -56,6 +59,7 @@ type MatrixState = {
   scrolls: ScrollDoc[];
   standing: Standing;
   motion: "system" | "reduce";
+  protocol: ProtocolStep[];
   setRunning: (running: boolean) => void;
   setMotion: (motion: "system" | "reduce") => void;
   setStanding: (standing: Partial<Standing>) => void;
@@ -66,6 +70,7 @@ type MatrixState = {
   releaseTask: (id: string) => Promise<void>;
   composeNow: () => Promise<void>;
   speakLatest: () => void;
+  askCounsel: (question: string) => Promise<string>;
   runCycle: () => Promise<void>;
 };
 
@@ -110,6 +115,27 @@ async function pushAudit(
   return { ledger, anchor, chainOk: check.ok };
 }
 
+function protocolInput(state: MatrixState, featured: string) {
+  const missing = state.scrolls.filter(
+    (scroll) => !scroll.source.trim() || !scroll.copyright.trim(),
+  ).length;
+  return {
+    provinces: state.provinces,
+    scrolls: state.scrolls.length,
+    missingProvenance: missing,
+    holds: state.tasks.filter((task) => task.status === "hold").length,
+    chain: (state.chainOk === false ? "review" : state.chainOk ? "intact" : "unsealed") as
+      | "intact"
+      | "review"
+      | "unsealed",
+    ledger: state.ledger.length,
+    anchor: state.anchor,
+    prayers: state.prayers.length,
+    projects: state.projects,
+    featured,
+  };
+}
+
 export const useMatrix = create<MatrixState>()(
   persist(
     (set, get) => ({
@@ -127,6 +153,7 @@ export const useMatrix = create<MatrixState>()(
       scrolls: SCROLLS,
       standing: { enabled: true, intent: "zimbabwe", lang: "en" },
       motion: "system",
+      protocol: [],
       setRunning: (running) => set({ running }),
       setMotion: (motion) => set({ motion }),
       setStanding: (standing) =>
@@ -299,6 +326,37 @@ export const useMatrix = create<MatrixState>()(
         utterance.lang = prayer.lang === "sn" ? "sn" : "en";
         window.speechSynthesis.speak(utterance);
       },
+      askCounsel: async (question) => {
+        const state = get();
+        const answer = counsel(question, protocolInput(state, "Counsel asked from the command board."));
+        if (state.busy) return answer;
+        set({ busy: true });
+        try {
+          const audited = await pushAudit(
+            get(),
+            "counsel",
+            "Grok Masawi",
+            answer,
+            "Grok Masawi",
+          );
+          set({
+            ...audited,
+            feed: [
+              {
+                id: id(),
+                at: now(),
+                agent: "Grok Masawi",
+                kind: "recommendation" as const,
+                summary: answer,
+              },
+              ...get().feed,
+            ].slice(0, 40),
+          });
+          return answer;
+        } finally {
+          set({ busy: false });
+        }
+      },
       runCycle: async () => {
         const state = get();
         if (!state.running || state.busy) return;
@@ -312,9 +370,9 @@ export const useMatrix = create<MatrixState>()(
             (scroll) => !scroll.source.trim() || !scroll.copyright.trim(),
           ).length;
           const holds = state.tasks.filter((task) => task.status === "hold").length;
-          let summary = "";
+          let featured = "";
           if (plan.kind === "health") {
-            summary = `Heartbeat. Ledger entries ${state.ledger.length}. Steward holds ${holds}. Chain ${state.chainOk === false ? "needs review" : state.chainOk ? "intact" : "not yet sealed"}. No infrastructure was changed.`;
+            featured = `Heartbeat. Ledger entries ${state.ledger.length}. Steward holds ${holds}. No infrastructure was changed.`;
           } else if (plan.kind === "rescore") {
             const names = order
               .slice(0, 3)
@@ -323,12 +381,12 @@ export const useMatrix = create<MatrixState>()(
                   `${index + 1}. ${province.name} ${priorityScore(province.factors).toFixed(2)}`,
               )
               .join("; ");
-            summary = `Scenario ranking only, not official policy. ${names}.`;
+            featured = `Scenario ranking only, not official policy. ${names}.`;
           } else if (plan.kind === "knowledge") {
-            summary = `Scroll Gate holds ${state.scrolls.length} texts. ${missing} lack provenance. Masowe history is not invented to fill a gap.`;
+            featured = `Scroll Gate holds ${state.scrolls.length} texts. ${missing} lack provenance. Masowe history is not invented to fill a gap.`;
           } else if (plan.kind === "recommendation") {
             const factor = dominantFactor(top.factors);
-            summary = `Planning note for ${top.name}: scenario priority ${priorityScore(top.factors).toFixed(2)}, led by ${FACTOR_LABEL[factor]}. This is not delivered aid.`;
+            featured = `Planning note for ${top.name}: scenario priority ${priorityScore(top.factors).toFixed(2)}, led by ${FACTOR_LABEL[factor]}. This is not delivered aid.`;
           } else if (state.standing.enabled) {
             const prayer = composePrayer(state.standing.intent, state.standing.lang);
             const saved: SavedPrayer = {
@@ -340,28 +398,31 @@ export const useMatrix = create<MatrixState>()(
               body: prayer.body,
             };
             set({ prayers: [saved, ...get().prayers].slice(0, 24) });
-            summary = `Mutsvene composed “${prayer.title}”. ${prayer.notice}`;
+            featured = `Mutsvene composed “${prayer.title}”. ${prayer.notice}`;
           } else {
-            summary =
-              "Mutsvene is idle. Standing devotion is off, so nothing was composed.";
+            featured = "Mutsvene is idle. Standing devotion is off, so nothing was composed.";
           }
+          const latest = get();
+          const steps = runProtocol(protocolInput(latest, featured));
+          const summary = steps.map((step) => `${step.name}: ${step.outcome}`).join(" ");
           const audited = await pushAudit(
-            get(),
-            plan.kind,
+            latest,
+            "command-protocol",
             plan.agent,
             summary,
-            plan.agent,
+            "ZionCore",
           );
           const feed: FeedItem = {
             id: id(),
             at: now(),
-            agent: plan.agent,
+            agent: "Heavenly Nexus",
             kind: plan.kind,
-            summary,
+            summary: steps[steps.length - 1]?.outcome ?? featured,
           };
           set({
             ...audited,
             tick,
+            protocol: steps,
             feed: [feed, ...get().feed].slice(0, 40),
           });
         } finally {
@@ -387,6 +448,7 @@ export const useMatrix = create<MatrixState>()(
         scrolls: state.scrolls,
         standing: state.standing,
         motion: state.motion,
+        protocol: state.protocol,
       }),
       merge: (persisted, current) => {
         if (!persisted || typeof persisted !== "object") return current;

@@ -9,11 +9,15 @@ import {
   dominantFactor,
   planCycle,
   priorityScore,
+  runProtocol,
   sealEntry,
   stewardReleaseOutcome,
   verifyChain,
   weightsSum,
+  counsel,
 } from "./engine.ts";
+import { PROVINCES } from "./catalog.ts";
+import { workstreams } from "./blueprint.ts";
 
 describe("allocation formula", () => {
   it("uses the published weights and clamps inputs", () => {
@@ -93,6 +97,56 @@ describe("devotion and release", () => {
     assert.equal(planCycle(1).kind, "health");
     assert.equal(planCycle(5).agent, "Mutsvene");
     assert.equal(planCycle(5).phase, "broadcast");
+  });
+});
+
+describe("command protocol", () => {
+  const input = {
+    provinces: PROVINCES,
+    scrolls: 4,
+    missingProvenance: 0,
+    holds: 1,
+    chain: "intact" as const,
+    ledger: 3,
+    anchor: "a".repeat(64),
+    prayers: 0,
+    projects: [
+      { sector: "water", title: "note" },
+      { sector: "electricity", title: "note" },
+    ],
+    featured: "Heartbeat only.",
+  };
+
+  it("runs all eight board steps without claiming a celestial result", () => {
+    const steps = runProtocol(input);
+    assert.equal(steps.length, 8);
+    assert.equal(steps[3].name, "Broadcast");
+    assert.match(steps[3].outcome, /Internal bulletin only/);
+    assert.match(steps[5].outcome, /cannot free a person/);
+    assert.match(steps[6].outcome, /not a visit to another year/);
+    assert.match(steps[7].outcome, /not that the poster/);
+  });
+
+  it("refuses steward questions and stays inside the console", () => {
+    assert.match(counsel("Transfer the donation", input), /Refused/);
+    assert.match(counsel("How is Masvingo scored?", input), /Masvingo/);
+    assert.match(counsel("How is Masvingo scored?", input), /no outside model/i);
+  });
+
+  it("keeps freeing prisoners off the work queue", () => {
+    const free = workstreams({
+      provinces: PROVINCES,
+      projects: [],
+      scrolls: 0,
+      prayers: 0,
+      holds: 0,
+      ledger: 0,
+      tick: 1,
+      running: true,
+      chain: "unsealed",
+      anchor: "0".repeat(64),
+    }).find((line) => line.name === "Free the imprisoned");
+    assert.equal(free?.state, "Refused");
   });
 });
 

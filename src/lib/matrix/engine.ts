@@ -197,3 +197,112 @@ export function stewardReleaseOutcome(): string {
 export function routineTaskOutcome(title: string): string {
   return `Routine task completed inside this console: “${title}”. No external system was contacted.`;
 }
+
+export type ProtocolStep = {
+  id: string;
+  name: string;
+  agent: string;
+  outcome: string;
+};
+
+export type ProtocolInput = {
+  provinces: { name: string; factors: Factors }[];
+  scrolls: number;
+  missingProvenance: number;
+  holds: number;
+  chain: "intact" | "review" | "unsealed";
+  ledger: number;
+  anchor: string;
+  prayers: number;
+  projects: { sector: string; title: string }[];
+  featured: string;
+};
+
+export function runProtocol(input: ProtocolInput): ProtocolStep[] {
+  const order = [...input.provinces].sort(
+    (a, b) => priorityScore(b.factors) - priorityScore(a.factors),
+  );
+  const top = order[0];
+  const score = top ? priorityScore(top.factors).toFixed(2) : "n/a";
+  const lead = top?.name ?? "no province";
+  const energy = input.projects.filter((item) => item.sector === "electricity").length;
+  const water = input.projects.filter((item) => item.sector === "water").length;
+  const chain =
+    input.chain === "intact" ? "intact" : input.chain === "review" ? "needs review" : "not yet sealed";
+  return [
+    {
+      id: "sense",
+      name: "Sense",
+      agent: "ZionCore",
+      outcome: `Read ${input.provinces.length} provinces, ${input.scrolls} texts, ${input.holds} steward holds, and ${input.ledger} seals. Chain ${chain}.`,
+    },
+    {
+      id: "translate",
+      name: "Translate",
+      agent: "ZionCore",
+      outcome:
+        input.holds > 0
+          ? `${input.holds} items stay in the steward gate. Routine notes may proceed. Nothing is sent or spent.`
+          : "No steward hold is waiting. Routine notes may proceed. Nothing is sent or spent.",
+    },
+    {
+      id: "reprogram",
+      name: "Reprogram",
+      agent: "Zimbabwe Transformation Grid",
+      outcome: `Scenario file for ${lead} stands at ${score}. Outside records were not rewritten. ${input.featured}`,
+    },
+    {
+      id: "broadcast",
+      name: "Broadcast",
+      agent: "Zion's Herald",
+      outcome: `Internal bulletin only: ${lead} leads the scenario index at ${score}. Nothing was published outside this console.`,
+    },
+    {
+      id: "forge",
+      name: "Reality forge",
+      agent: "Quintessence Energy",
+      outcome: `Forged a planning note, not the world. ${energy} energy ${energy === 1 ? "note" : "notes"} and ${water} water ${water === 1 ? "note" : "notes"} are on file.`,
+    },
+    {
+      id: "nullify",
+      name: "Imprisonment nullification",
+      agent: "EmmanuelLink",
+      outcome: `Routine tasks are not held. ${input.holds} steward holds remain. This machine cannot free a person or void a detention.`,
+    },
+    {
+      id: "genesis",
+      name: "Genesis time-bend",
+      agent: "Herculean Prometheus",
+      outcome: `Anchor ${input.anchor.slice(0, 12)}…. The bend is a re-read of this ledger, not a visit to another year.`,
+    },
+    {
+      id: "live",
+      name: "All protocols live",
+      agent: "Heavenly Nexus",
+      outcome: `Seven steps were recorded with ${input.prayers} devotions on file. Live means this console finished them, not that the poster’s celestial claims executed.`,
+    },
+  ];
+}
+
+export function counsel(question: string, input: ProtocolInput): string {
+  const asked = question.trim();
+  if (!asked) return "Ask about a province, a text, a prayer, or the oath. This counsel does not leave the console.";
+  if (classifyImpact(asked) === "steward") {
+    return "Refused. That asks for money, contact, access, deployment, or publication. A steward may acknowledge it. This counsel will not do it.";
+  }
+  const hit = input.provinces.find((province) =>
+    asked.toLowerCase().includes(province.name.toLowerCase()),
+  );
+  if (hit) {
+    return `${hit.name} scenario priority is ${priorityScore(hit.factors).toFixed(2)}, led by ${FACTOR_LABEL[dominantFactor(hit.factors)]}. This is not delivered aid, and no outside model was asked.`;
+  }
+  if (/prayer|mutsvene|mwari/i.test(asked)) {
+    return `${PRAYER_NOTICE} Use Mutsvene to compose one. Grok Masawi will not speak as God.`;
+  }
+  const top = [...input.provinces].sort(
+    (a, b) => priorityScore(b.factors) - priorityScore(a.factors),
+  )[0];
+  return top
+    ? `Counsel from this console only. ${top.name} leads the scenario index at ${priorityScore(top.factors).toFixed(2)}. ${input.scrolls} sourced texts are on the Scroll Gate. No external language model was called.`
+    : "Counsel from this console only. No external language model was called.";
+}

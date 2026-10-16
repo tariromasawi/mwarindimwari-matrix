@@ -7,6 +7,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { CommandBoard } from "@/components/matrix/CommandBoard";
 import { LivingDeck } from "@/components/matrix/LivingDeck";
 import {
   AGENTS,
@@ -33,6 +34,7 @@ import type {
 
 const VIEWS = [
   ["matrix", "Living Matrix"],
+  ["command", "Command"],
   ["overview", "Manifest"],
   ["zion", "ZionCore"],
   ["grid", "Grid"],
@@ -177,6 +179,7 @@ export function MatrixApp() {
       <main className="mx-auto flex max-w-7xl flex-col gap-4 px-3 py-4 md:px-4">
         <div key={view} className="view-enter flex flex-col gap-4">
         {view === "matrix" && <LivingDeck />}
+        {view === "command" && <CommandBoard />}
         {view === "overview" && <Overview />}
         {view === "zion" && <Zion />}
         {view === "grid" && <Grid />}
@@ -250,13 +253,13 @@ function Overview() {
         </Panel>
         <Panel eyebrow="Eight phases, stated honestly" title="What is already alive">
           <ul className="flex flex-col gap-2 text-sm text-mist">
-            <li>1. Identity and module manifest — in this console.</li>
-            <li>2. Seven control seals and a tamper-evident ledger — in this browser, not a certified production deployment.</li>
-            <li>3. ZionCore routine autonomy — running, bounded.</li>
-            <li>4. Mutsvene and Scroll Gate — voluntary, sourced, not claimed as revelation.</li>
-            <li>5. Ten-province grid — census populations plus scenario factors you can change.</li>
-            <li>6. Agent desks — rules, not an outside model.</li>
-            <li>7. Engine tests — in the GitHub repository.</li>
+            <li>1. Sense, translate, reprogram, and internal broadcast — every cycle.</li>
+            <li>2. Reality forge writes planning notes only. It does not remake the world.</li>
+            <li>3. Imprisonment nullification clears nothing outside this console, and it cannot free a person.</li>
+            <li>4. Genesis time-bend re-reads the ledger. It does not visit another year.</li>
+            <li>5. Realm, time, shield, and global lists are live on the Command board.</li>
+            <li>6. Grok Masawi answers from this console. No external model is called.</li>
+            <li>7. Poster lines that claim wealth, realms, or ancient years stay Symbol or Refused.</li>
             <li>8. The cycle repeats. It does not rewrite its own source code.</li>
           </ul>
         </Panel>
