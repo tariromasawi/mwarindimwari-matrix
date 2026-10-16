@@ -59,9 +59,14 @@ src/lib/matrix/engine.ts       scoring, audit chain, prayer, impact gate
 src/lib/matrix/engine.test.ts  the checks above
 src/lib/matrix/types.ts        shared types
 src/lib/matrix/catalog.ts      provinces, modules, scripture citations, agent bounds
+src/lib/matrix/store.ts        console state: cycle, tasks, ledger, prayers
+src/components/matrix/MatrixApp.tsx
+                               reference copy of the operating console
 system-spec.json               machine-readable manifest
 PHASES.md                      what each phase implemented, and what it refused
 ```
+
+`MatrixApp.tsx` is the screen you use. In this repository it is kept so the behavior can be read beside the tests. It expects the host app’s `@/` imports, React, and Recharts; `npm test` does not need them.
 
 ## License
 
