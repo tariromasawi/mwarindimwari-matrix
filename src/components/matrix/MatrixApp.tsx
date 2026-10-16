@@ -32,6 +32,8 @@ import type {
   Sector,
 } from "@/lib/matrix/types";
 
+const BLUEPRINT = `${import.meta.env.BASE_URL}blueprints/command.jpg`;
+
 const VIEWS = [
   ["matrix", "Living Matrix"],
   ["command", "Command"],
@@ -87,7 +89,6 @@ export function MatrixApp() {
   const running = useMatrix((s) => s.running);
   const setRunning = useMatrix((s) => s.setRunning);
   const chainOk = useMatrix((s) => s.chainOk);
-  const feed = useMatrix((s) => s.feed);
   const [view, setView] = useState<ViewId>("matrix");
   const [ready, setReady] = useState(false);
 
@@ -116,19 +117,16 @@ export function MatrixApp() {
   return (
     <div className={motion === "reduce" ? "reduce-motion min-h-screen bg-ink text-ivory" : "min-h-screen bg-ink text-ivory"}>
       <div className="crest-rule" />
-      <header className="sticky top-0 z-30 border-b border-line bg-ink">
-        <div className="mx-auto flex max-w-7xl flex-col gap-3 px-3 py-3 md:px-4">
-          <div className="flex items-start justify-between gap-3">
-            <div>
+      <header className="sticky top-0 z-30 border-b border-line bg-ink/95 backdrop-blur">
+        <div className="mx-auto flex max-w-7xl flex-col gap-2 px-3 py-2 md:px-4">
+          <div className="flex items-center justify-between gap-3">
+            <div className="min-w-0">
               <p className="text-xs font-semibold tracking-widest text-gold">
                 {IDENTITY.identifier}
               </p>
-              <h1 className="font-display text-2xl leading-tight md:text-3xl">
+              <h1 className="truncate font-display text-xl leading-tight md:text-2xl">
                 {IDENTITY.name} {IDENTITY.mark}
               </h1>
-              <p className="text-sm text-mist">
-                {IDENTITY.declaration}. {IDENTITY.mission}.
-              </p>
             </div>
             <button
               type="button"
@@ -141,23 +139,14 @@ export function MatrixApp() {
           <div className="flex flex-wrap items-center gap-2 text-xs">
             <span className="inline-flex items-center gap-2 rounded-full border border-line px-3 py-1">
               <span className="live-dot inline-block size-2 rounded-full bg-gold" aria-hidden="true" />
-              {running ? "Routine autonomy on" : "Routine autonomy paused"}
+              {running ? "Cycle live" : "Cycle paused"}
             </span>
             <span className="rounded-full border border-line px-3 py-1 text-mist">{chainLabel}</span>
-            <span className="rounded-full border border-line px-3 py-1 text-mist">
-              Steward gate armed
+            <span className="hidden rounded-full border border-line px-3 py-1 text-mist sm:inline">
+              {IDENTITY.mission}
             </span>
           </div>
-          {feed[0] ? (
-            <p className="text-sm text-mist">
-              <span className="text-ivory">{feed[0].agent}.</span> {feed[0].summary}
-            </p>
-          ) : (
-            <p className="text-sm text-mist">
-              ZionCore is armed. The first sealed cycle appears as soon as this console is ready.
-            </p>
-          )}
-          <nav aria-label="Matrix sections" className="flex gap-2 overflow-x-auto pb-1">
+          <nav aria-label="Matrix sections" className="flex flex-nowrap gap-2 overflow-x-auto pb-1">
             {VIEWS.map(([id, label]) => (
               <button
                 key={id}
@@ -165,8 +154,8 @@ export function MatrixApp() {
                 aria-current={view === id ? "page" : undefined}
                 className={
                   view === id
-                    ? "min-h-11 shrink-0 rounded-full bg-gold px-4 text-sm font-semibold text-ink"
-                    : "min-h-11 shrink-0 rounded-full border border-line px-4 text-sm text-mist"
+                    ? "min-h-11 shrink-0 rounded-full bg-gold px-4 text-sm font-semibold whitespace-nowrap text-ink"
+                    : "min-h-11 shrink-0 rounded-full border border-line px-4 text-sm whitespace-nowrap text-mist"
                 }
                 onClick={() => setView(id)}
               >
@@ -177,6 +166,24 @@ export function MatrixApp() {
         </div>
       </header>
       <main className="mx-auto flex max-w-7xl flex-col gap-4 px-3 py-4 md:px-4">
+        <div className="flex gap-2 overflow-x-auto">
+          {[
+            ["The Holy Bible", "KJV citations"],
+            ["The Qur'an", "Add with provenance"],
+            ["The Torah", "KJV Hebrew Bible"],
+            ["All sacred texts", "Scroll Gate"],
+          ].map(([label, hint]) => (
+            <button
+              key={label}
+              type="button"
+              className="min-h-11 shrink-0 rounded-full border border-line px-3 text-left"
+              onClick={() => setView("scrolls")}
+            >
+              <span className="block text-xs tracking-widest text-gold">{label}</span>
+              <span className="block text-xs text-mist">{hint}</span>
+            </button>
+          ))}
+        </div>
         <div key={view} className="view-enter flex flex-col gap-4">
         {view === "matrix" && <LivingDeck />}
         {view === "command" && <CommandBoard />}
@@ -191,6 +198,19 @@ export function MatrixApp() {
         {view === "boards" && <Blueprints />}
         </div>
       </main>
+      <footer className="board-foot">
+        <div className="mx-auto flex max-w-7xl flex-col gap-2 px-3 py-4 text-center md:px-4">
+          <p className="font-display text-xs tracking-widest text-gold">
+            {IDENTITY.numerals.join(" · ")} ∞
+          </p>
+          <p className="text-xs leading-relaxed text-mist">
+            Board inscription: Zimbabwe transformation grid · MWARINDIMWARI reigns as the mission name · humanity, the land, and the ten provinces stay on the scenario file. The glowing shields on the poster are symbols. This console only lights what it can seal.
+          </p>
+          <p className="text-xs text-ivory">
+            {IDENTITY.founder} · {IDENTITY.office} · {IDENTITY.mission}
+          </p>
+        </div>
+      </footer>
     </div>
   );
 }
@@ -277,7 +297,7 @@ function Overview() {
       </div>
       <Panel eyebrow="Design illustration" title="The blueprint is not the deployment">
         <img
-          src="/blueprints/command.jpg"
+          src={BLUEPRINT}
           alt="Illustrated blueprint poster for the MWARINDIMWARI Matrix. Decorative only."
           className="w-full rounded-xl border border-line"
         />
@@ -290,26 +310,20 @@ function Overview() {
 }
 
 function Blueprints() {
-  const boards = [
-    ["/blueprints/command.jpg", "Command board", "The One Key, seven seals, realm matrix, and the Zimbabwe grid as drawn."],
-    ["/blueprints/system.jpg", "System blueprint", "Architecture, sacred texts, and a deployment map the console does not pretend to run."],
-    ["/blueprints/radiant.jpg", "Radiant seal", "Protection layer and global operations from the source art."],
-    ["/blueprints/crimson.jpg", "Crimson matrix", "The same living seal in the red register of the original boards."],
-  ] as const;
   return (
     <div className="flex flex-col gap-4">
       <p className="text-sm leading-relaxed text-mist">
-        These four boards are the source. The living matrix keeps their names, numerals, provinces, and seals, and only lights what this browser can actually compute.
+        This is the source command board. The living matrix keeps its names, numerals, provinces, seals, and sacred-text desks, and only lights what this browser can actually compute.
       </p>
-      {boards.map(([src, title, copy]) => (
-        <figure key={src} className="overflow-hidden rounded-xl border border-line bg-panel">
-          <img src={src} alt="" className="w-full" />
-          <figcaption className="p-3">
-            <p className="font-display text-base">{title}</p>
-            <p className="text-sm text-mist">{copy}</p>
-          </figcaption>
-        </figure>
-      ))}
+      <figure className="overflow-hidden rounded-xl border border-line bg-panel">
+        <img src={BLUEPRINT} alt="MWARINDIMWARI Matrix command blueprint" className="w-full" />
+        <figcaption className="p-3">
+          <p className="font-display text-base">Command board</p>
+          <p className="text-sm text-mist">
+            The One Key, seven seals, realm matrix, Zimbabwe grid, and Mudzimu Unoyera as drawn. Open Command to run those panels.
+          </p>
+        </figcaption>
+      </figure>
     </div>
   );
 }

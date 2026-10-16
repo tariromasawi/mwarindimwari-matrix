@@ -432,7 +432,15 @@ export const useMatrix = create<MatrixState>()(
     }),
     {
       name: "mwarindimwari-matrix",
-      storage: createJSONStorage(() => localStorage),
+      storage: createJSONStorage(() =>
+        typeof localStorage === "undefined"
+          ? {
+              getItem: () => null,
+              setItem: () => undefined,
+              removeItem: () => undefined,
+            }
+          : localStorage,
+      ),
       skipHydration: true,
       partialize: (state) => ({
         running: state.running,

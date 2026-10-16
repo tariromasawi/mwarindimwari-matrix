@@ -1,12 +1,14 @@
 import { useState, type ReactNode } from "react";
 import {
   attributes,
+  celestialLayer,
   execution,
   KEY_REGISTRY,
   realms,
   shields,
   timeLines,
   workstreams,
+  zimbabweGrid,
   type BoardLine,
 } from "@/lib/matrix/blueprint";
 import { IDENTITY } from "@/lib/matrix/catalog";
@@ -94,6 +96,12 @@ export function CommandBoard() {
         )}
       </Block>
       <div className="grid gap-4 lg:grid-cols-2">
+        <Block eyebrow="Celestial protection layer" title="Names from the board, states from the checks">
+          <Lines items={celestialLayer(input)} />
+        </Block>
+        <Block eyebrow="Zimbabwe transformation grid" title="Twelve charges, scored as work">
+          <Lines items={zimbabweGrid(input)} />
+        </Block>
         <Block eyebrow="The One Key" title="Registry, not a secret">
           <p className="mb-3 text-sm text-mist">
             {IDENTITY.founder}. Board birth note: {IDENTITY.boardBorn}. {IDENTITY.boardBornNote}

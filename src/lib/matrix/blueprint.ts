@@ -327,3 +327,141 @@ export function execution(input: BoardInput): BoardLine[] {
     },
   ];
 }
+
+function sectorCount(input: BoardInput, sector: string): number {
+  return input.projects.filter((item) => item.sector === sector).length;
+}
+
+export function zimbabweGrid(input: BoardInput): BoardLine[] {
+  const lead = [...input.provinces].sort((a, b) => b.factors.need - a.factors.need)[0];
+  return [
+    {
+      name: "Poverty eradication",
+      state: "Watch",
+      detail: lead
+        ? `${lead.name} leads the scenario-need file. A queue, not a finished campaign.`
+        : "No provinces loaded.",
+    },
+    {
+      name: "Heal the nation",
+      state: "Watch",
+      detail: `${sectorCount(input, "healthcare")} healthcare notes. No clinic has been instructed.`,
+    },
+    {
+      name: "Remove corruption",
+      state: "Holding",
+      detail: "The oath forbids unsupervised money. No treasury is connected.",
+    },
+    {
+      name: "Justice restoration",
+      state: "Holding",
+      detail: "Gaps can be recorded. This console is not a court.",
+    },
+    {
+      name: "Clean governance",
+      state: "Holding",
+      detail: "Steward holds stay locked until a person acknowledges them, and still nothing is sent.",
+    },
+    {
+      name: "Food and water security",
+      state: "Watch",
+      detail: `${sectorCount(input, "food")} food notes and ${sectorCount(input, "water")} water notes. Nothing has been delivered.`,
+    },
+    {
+      name: "Free energy nationwide",
+      state: "Watch",
+      detail: `${sectorCount(input, "electricity")} energy notes. No power grid telemetry is live.`,
+    },
+    {
+      name: "Healthcare for all",
+      state: "Watch",
+      detail: "Healthcare stays a planning sector on the ten-province grid.",
+    },
+    {
+      name: "Education for all",
+      state: "Watch",
+      detail: `${sectorCount(input, "education")} education notes. No school has been instructed.`,
+    },
+    {
+      name: "Spiritual renewal",
+      state: "Live",
+      detail: `${input.prayers} voluntary devotions on file. None is a verified message from God.`,
+    },
+    {
+      name: "Economic prosperity",
+      state: "Refused",
+      detail: "No payment rail is connected, and none will run unattended.",
+    },
+    {
+      name: "Land and people restored",
+      state: "Symbol",
+      detail: "The mission remains: no one and nothing left behind. It is a charge, not a completed state.",
+    },
+  ];
+}
+
+export function celestialLayer(input: BoardInput): BoardLine[] {
+  return [
+    {
+      name: "MWARINDIMWARI shield",
+      state: "Symbol",
+      detail: "Named on the board. The running shield is the steward gate plus the hash chain.",
+    },
+    {
+      name: "Mudzimu Unoyera seal",
+      state: "Live",
+      detail: "The living field is labelled with that name. It indexes the ten provinces, not a spirit realm.",
+    },
+    {
+      name: "Seven layer firewall",
+      state: input.chain === "review" ? "Watch" : "Holding",
+      detail: "Seven control families. Not a production certificate.",
+    },
+    {
+      name: "Angelic host active",
+      state: "Symbol",
+      detail: "The phrase stays on the board. No host is connected.",
+    },
+    {
+      name: "Anti-evil matrix online",
+      state: "Holding",
+      detail: `${input.holds} steward holds. Money, contact, and publication are classified out of the cycle.`,
+    },
+    {
+      name: "Curse nullification",
+      state: "Refused",
+      detail: "This program does not detect or cancel a curse.",
+    },
+    {
+      name: "Demonic nodes removed",
+      state: "Refused",
+      detail: "No such nodes exist in this software, so none were removed.",
+    },
+    {
+      name: "Spiritual cleanse",
+      state: input.running ? "Watch" : "Watch",
+      detail: "Mutsvene may compose a voluntary prayer on its turn. That is not a cleanse of a place.",
+    },
+    {
+      name: "Zimbabwe protected",
+      state: "Watch",
+      detail: `${input.provinces.length} provinces are scored. Protection here is a planning record, not a guarantee.`,
+    },
+    {
+      name: "All Masowe covered",
+      state: "Symbol",
+      detail: "The intention is recorded. No membership register is connected.",
+    },
+    {
+      name: "All humanity covered",
+      state: "Symbol",
+      detail: "The mission names everyone. The console only reaches its own desks.",
+    },
+    {
+      name: "Eternal guard active",
+      state: input.running ? "Live" : "Watch",
+      detail: input.running ? "The routine cycle is allowed to keep its heartbeat." : "The cycle is paused.",
+    },
+  ];
+}
+

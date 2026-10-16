@@ -1,5 +1,11 @@
 # MWARINDIMWARI MATRIX ∞
 
+**Live command board:** https://tariromasawi.github.io/mwarindimwari-matrix/
+
+The page runs the same governed console as this repository: ZionCore cycle, ten-province Zimbabwe grid, seven-layer seal, One Key, sacred-text gate, Mutsvene, and the hash ledger. Poster language from the blueprint stays on the board. The cycle does not move money, send messages, or claim a miracle.
+
+Rebuild the page from `web/` with `npm install` and `npm run build` inside that folder. Output is `docs/`, which GitHub Pages serves.
+
 Governed operating core for the system designed by HRH Saint Tariro Masawi.
 
 **MWARINDIMWARI — Mwari ndi Mwari.**
