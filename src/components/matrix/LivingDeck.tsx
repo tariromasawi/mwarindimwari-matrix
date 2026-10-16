@@ -57,7 +57,7 @@ export function LivingDeck() {
           ))}
         </div>
         {selected ? (
-          <section className="rounded-xl border border-line bg-panel p-4">
+          <section key={selected.id} className="focus-card rounded-xl border border-line bg-panel p-4">
             <p className="text-xs font-semibold tracking-widest text-gold">Focused province</p>
             <h2 className="font-display text-2xl leading-tight">{selected.name}</h2>
             <p className="mt-1 text-sm text-mist">
@@ -94,7 +94,7 @@ export function LivingDeck() {
           <p className="text-xs font-semibold tracking-widest text-gold">Seven-layer seal</p>
           <ul className="mt-2 flex flex-col gap-2">
             {SEAL_COPY.map((seal, index) => (
-              <li key={seal.id} className="flex items-start justify-between gap-3 text-sm">
+              <li key={seal.id} className="seal-row flex items-start justify-between gap-3 text-sm">
                 <span>
                   <span className="text-gold">{index + 1}</span> {seal.name}
                 </span>
@@ -141,7 +141,7 @@ export function LivingDeck() {
           ) : (
             <ul className="mt-2 flex flex-col gap-3">
               {feed.slice(0, 4).map((item) => (
-                <li key={item.id}>
+                <li key={item.id} className="feed-line">
                   <p className="text-xs text-gold">{item.agent}</p>
                   <p className="text-sm leading-relaxed text-mist">{item.summary}</p>
                 </li>

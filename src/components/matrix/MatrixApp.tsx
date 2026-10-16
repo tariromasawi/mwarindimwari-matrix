@@ -175,6 +175,7 @@ export function MatrixApp() {
         </div>
       </header>
       <main className="mx-auto flex max-w-7xl flex-col gap-4 px-3 py-4 md:px-4">
+        <div key={view} className="view-enter flex flex-col gap-4">
         {view === "matrix" && <LivingDeck />}
         {view === "overview" && <Overview />}
         {view === "zion" && <Zion />}
@@ -185,6 +186,7 @@ export function MatrixApp() {
         {view === "agents" && <Agents />}
         {view === "ledger" && <Ledger />}
         {view === "boards" && <Blueprints />}
+        </div>
       </main>
     </div>
   );

@@ -53,8 +53,13 @@ function mulberry32(seed: number) {
 
 export function LivingField({ provinces, focus, running, reduce, onFocus }: Props) {
   const ref = useRef<HTMLCanvasElement>(null);
+  const tipRef = useRef<HTMLDivElement>(null);
   const focusRef = useRef(focus);
+  const hoverRef = useRef<string | null>(null);
+  const pulsesRef = useRef<{ id: string; at: number }[]>([]);
+  const provincesRef = useRef(provinces);
   focusRef.current = focus;
+  provincesRef.current = provinces;
 
   useLayoutEffect(() => {
     const canvas = ref.current;
@@ -71,10 +76,16 @@ export function LivingField({ provinces, focus, running, reduce, onFocus }: Prop
     });
     let raf = 0;
     let stopped = false;
+    let lastFocus = focusRef.current;
     const media = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const still = reduce || !running || media.matches;
+    const still = reduce || media.matches;
 
     const paint = (time: number) => {
+      if (focusRef.current !== lastFocus) {
+        pulsesRef.current.push({ id: focusRef.current, at: time });
+        pulsesRef.current = pulsesRef.current.slice(-8);
+        lastFocus = focusRef.current;
+      }
       const rect = canvas.getBoundingClientRect();
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
       const w = Math.max(1, Math.floor(rect.width * dpr));
@@ -86,10 +97,12 @@ export function LivingField({ provinces, focus, running, reduce, onFocus }: Prop
       ctx.clearRect(0, 0, w, h);
       const cx = w * 0.5;
       const cy = h * 0.48;
-      const spin = still ? 0.4 : time / 9000;
+      const pace = running ? 1 : 0.35;
+      const spin = still ? 0.4 : (time / 9000) * pace;
 
       for (const star of stars) {
-        ctx.fillStyle = `rgba(244, 234, 212, ${star.a})`;
+        const twinkle = still ? star.a : star.a * (0.65 + 0.35 * Math.sin(time / 700 + star.x * 12));
+        ctx.fillStyle = `rgba(244, 234, 212, ${twinkle})`;
         ctx.beginPath();
         ctx.arc(star.x * w, star.y * h, star.r * dpr, 0, Math.PI * 2);
         ctx.fill();
@@ -106,12 +119,13 @@ export function LivingField({ provinces, focus, running, reduce, onFocus }: Prop
       }
       ctx.restore();
 
+      const beamPulse = still ? 0.85 : 0.55 + 0.45 * Math.sin(time / 480);
       const beam = ctx.createLinearGradient(cx, h * 0.05, cx, h * 0.92);
       beam.addColorStop(0, "rgba(243, 212, 138, 0)");
-      beam.addColorStop(0.45, "rgba(243, 212, 138, 0.85)");
+      beam.addColorStop(0.45, `rgba(243, 212, 138, ${beamPulse})`);
       beam.addColorStop(1, "rgba(94, 200, 255, 0)");
       ctx.strokeStyle = beam;
-      ctx.lineWidth = 3 * dpr;
+      ctx.lineWidth = (2 + beamPulse * 3) * dpr;
       ctx.beginPath();
       ctx.moveTo(cx, h * 0.06);
       ctx.lineTo(cx, h * 0.9);
@@ -138,7 +152,7 @@ export function LivingField({ provinces, focus, running, reduce, onFocus }: Prop
       ctx.lineWidth = 1.5 * dpr;
       ctx.stroke();
 
-      const nodes = provinces.map((province) => {
+      const nodes = provincesRef.current.map((province) => {
         const at = NODE_AT[province.id] ?? [0.5, 0.5];
         return {
           province,
@@ -150,16 +164,28 @@ export function LivingField({ provinces, focus, running, reduce, onFocus }: Prop
 
       ctx.lineWidth = 1 * dpr;
       for (const node of nodes) {
-        ctx.strokeStyle = `rgba(94, 200, 255, ${0.15 + node.score * 0.45})`;
+        const hot = node.province.id === focusRef.current || node.province.id === hoverRef.current;
+        ctx.strokeStyle = hot
+          ? "rgba(243, 212, 138, 0.85)"
+          : `rgba(94, 200, 255, ${0.15 + node.score * 0.45})`;
         ctx.beginPath();
         ctx.moveTo(node.x, node.y);
         ctx.lineTo(cx, cy);
         ctx.stroke();
+        if (!still && running) {
+          const travel = (time / 1400 + node.score) % 1;
+          const sparkX = node.x + (cx - node.x) * travel;
+          const sparkY = node.y + (cy - node.y) * travel;
+          ctx.fillStyle = "rgba(243, 212, 138, 0.95)";
+          ctx.beginPath();
+          ctx.arc(sparkX, sparkY, 2.2 * dpr, 0, Math.PI * 2);
+          ctx.fill();
+        }
       }
 
       if (!still) {
         for (const mote of motes) {
-          const a = mote.p + time / 4000;
+          const a = mote.p + (time / 4000) * pace;
           const mx = cx + Math.cos(a) * w * mote.s * 0.42;
           const my = cy + Math.sin(a * 1.3) * h * mote.s * 0.32;
           ctx.fillStyle = "rgba(243, 212, 138, 0.7)";
@@ -169,17 +195,38 @@ export function LivingField({ provinces, focus, running, reduce, onFocus }: Prop
         }
       }
 
+      pulsesRef.current = pulsesRef.current.filter((pulse) => time - pulse.at < 900);
+      for (const pulse of pulsesRef.current) {
+        const node = nodes.find((item) => item.province.id === pulse.id);
+        if (!node) continue;
+        const age = (time - pulse.at) / 900;
+        ctx.beginPath();
+        ctx.strokeStyle = `rgba(243, 212, 138, ${1 - age})`;
+        ctx.lineWidth = 2 * dpr;
+        ctx.arc(node.x, node.y, (12 + age * 46) * dpr, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+
       for (const node of nodes) {
         const hot = node.province.id === focusRef.current;
-        const radius = (5 + node.score * 10) * dpr;
+        const hovered = node.province.id === hoverRef.current;
+        const radius = (5 + node.score * 10 + (hovered ? 3 : 0)) * dpr;
+        if (hot && !still) {
+          const halo = 1 + 0.18 * Math.sin(time / 260);
+          ctx.beginPath();
+          ctx.strokeStyle = "rgba(243, 212, 138, 0.55)";
+          ctx.lineWidth = 1.5 * dpr;
+          ctx.arc(node.x, node.y, radius * halo + 6 * dpr, 0, Math.PI * 2);
+          ctx.stroke();
+        }
         ctx.beginPath();
-        ctx.fillStyle = hot ? "rgba(243, 212, 138, 0.95)" : "rgba(94, 200, 255, 0.9)";
+        ctx.fillStyle = hot || hovered ? "rgba(243, 212, 138, 0.95)" : "rgba(94, 200, 255, 0.9)";
         ctx.arc(node.x, node.y, radius, 0, Math.PI * 2);
         ctx.fill();
         ctx.strokeStyle = "rgba(7, 9, 16, 0.8)";
         ctx.lineWidth = 2 * dpr;
         ctx.stroke();
-        ctx.fillStyle = hot ? "#070910" : "#f4ead4";
+        ctx.fillStyle = hot || hovered ? "#070910" : "#f4ead4";
         ctx.font = `${11 * dpr}px Outfit, sans-serif`;
         ctx.textAlign = "center";
         ctx.fillText(node.province.short, node.x, node.y - radius - 4 * dpr);
@@ -200,23 +247,23 @@ export function LivingField({ provinces, focus, running, reduce, onFocus }: Prop
 
     paint(0);
     if (!still) raf = window.requestAnimationFrame(loop);
-    const onResize = () => paint(0);
+    const onResize = () => paint(performance.now());
     window.addEventListener("resize", onResize);
     return () => {
       stopped = true;
       window.cancelAnimationFrame(raf);
       window.removeEventListener("resize", onResize);
     };
-  }, [provinces, running, reduce]);
+  }, [reduce, running]);
 
-  function pick(event: PointerEvent<HTMLCanvasElement>) {
+  function hit(event: PointerEvent<HTMLCanvasElement>) {
     const canvas = ref.current;
-    if (!canvas) return;
+    if (!canvas) return null;
     const rect = canvas.getBoundingClientRect();
     const x = (event.clientX - rect.left) / rect.width;
     const y = (event.clientY - rect.top) / rect.height;
     let best: { id: string; d: number } | null = null;
-    for (const province of provinces) {
+    for (const province of provincesRef.current) {
       const at = NODE_AT[province.id];
       if (!at) continue;
       const nx = 0.08 + at[0] * 0.84;
@@ -224,7 +271,35 @@ export function LivingField({ provinces, focus, running, reduce, onFocus }: Prop
       const d = Math.hypot(nx - x, ny - y);
       if (!best || d < best.d) best = { id: province.id, d };
     }
-    if (best && best.d < 0.08) onFocus(best.id);
+    return best && best.d < 0.08 ? best.id : null;
+  }
+
+  function move(event: PointerEvent<HTMLCanvasElement>) {
+    const id = hit(event);
+    hoverRef.current = id;
+    const canvas = ref.current;
+    if (canvas) canvas.style.cursor = id ? "pointer" : "default";
+    const tip = tipRef.current;
+    const frame = canvas?.parentElement;
+    if (!tip || !frame || !canvas) return;
+    if (!id) {
+      tip.hidden = true;
+      return;
+    }
+    const province = provincesRef.current.find((item) => item.id === id);
+    if (!province) return;
+    const rect = frame.getBoundingClientRect();
+    tip.hidden = false;
+    tip.textContent = `${province.name} · ${priorityScore(province.factors).toFixed(2)}`;
+    tip.style.left = `${Math.min(event.clientX - rect.left + 14, rect.width - 160)}px`;
+    tip.style.top = `${Math.min(event.clientY - rect.top + 14, rect.height - 36)}px`;
+  }
+
+  function pick(event: PointerEvent<HTMLCanvasElement>) {
+    const id = hit(event);
+    if (!id) return;
+    pulsesRef.current.push({ id, at: performance.now() });
+    onFocus(id);
   }
 
   return (
@@ -232,8 +307,14 @@ export function LivingField({ provinces, focus, running, reduce, onFocus }: Prop
       <canvas
         ref={ref}
         onPointerDown={pick}
+        onPointerMove={move}
+        onPointerLeave={() => {
+          hoverRef.current = null;
+          if (tipRef.current) tipRef.current.hidden = true;
+        }}
         aria-label="Living matrix. Zimbabwe’s ten provinces glow by scenario priority. Press a node or use the province list."
       />
+      <div ref={tipRef} className="field-tip" hidden />
       <div className="field-caption">
         <span>Living key</span>
         <span>{running ? "Cycle live" : "Cycle paused"}</span>
@@ -242,12 +323,7 @@ export function LivingField({ provinces, focus, running, reduce, onFocus }: Prop
   );
 }
 
-function drawAnkh(
-  ctx: CanvasRenderingContext2D,
-  x: number,
-  y: number,
-  s: number,
-) {
+function drawAnkh(ctx: CanvasRenderingContext2D, x: number, y: number, s: number) {
   ctx.save();
   ctx.translate(x, y);
   ctx.strokeStyle = "rgba(243, 212, 138, 0.95)";
