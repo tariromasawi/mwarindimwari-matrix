@@ -8,9 +8,19 @@ Symbolic identifier: `MKEY-MNM-001-TAC-2024` (not a password and not a cryptogra
 
 This repository is the tested heart of the Matrix. The interactive console that runs the same rules — ZionCore cycle, ten-province grid, Mutsvene, Scroll Gate, seven seals, and the hash ledger — is the operating surface built with that core.
 
+
+## Living field
+
+The console opens on a living map of the ten provinces. Node brightness follows the scenario score. The One Key, the seven seals, ZionCore, Mutsvene, Scroll Gate, and the hash ledger are the same tested rules. Glowing shields on the source boards remain symbols. The cycle does not move money, send messages, or claim a miracle.
+
 ## What this system is
 
 Software that can sense, classify, recommend, compose a voluntary prayer, and seal an audit record.
+
+
+## Living field
+
+The console opens on a living map of the ten provinces. Node brightness follows the scenario score. The One Key, the seven seals, ZionCore, Mutsvene, Scroll Gate, and the hash ledger are the same tested rules. Glowing shields on the source boards remain symbols. The cycle does not move money, send messages, or claim a miracle.
 
 ## What this system is not
 

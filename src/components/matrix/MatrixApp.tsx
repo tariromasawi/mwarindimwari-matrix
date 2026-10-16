@@ -7,6 +7,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { LivingDeck } from "@/components/matrix/LivingDeck";
 import {
   AGENTS,
   CENSUS_SOURCE,
@@ -31,7 +32,8 @@ import type {
 } from "@/lib/matrix/types";
 
 const VIEWS = [
-  ["overview", "Overview"],
+  ["matrix", "Living Matrix"],
+  ["overview", "Manifest"],
   ["zion", "ZionCore"],
   ["grid", "Grid"],
   ["mutsvene", "Mutsvene"],
@@ -39,6 +41,7 @@ const VIEWS = [
   ["seals", "Seals"],
   ["agents", "Agents"],
   ["ledger", "Ledger"],
+  ["boards", "Blueprints"],
 ] as const;
 
 type ViewId = (typeof VIEWS)[number][0];
@@ -83,7 +86,7 @@ export function MatrixApp() {
   const setRunning = useMatrix((s) => s.setRunning);
   const chainOk = useMatrix((s) => s.chainOk);
   const feed = useMatrix((s) => s.feed);
-  const [view, setView] = useState<ViewId>("overview");
+  const [view, setView] = useState<ViewId>("matrix");
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
@@ -112,7 +115,7 @@ export function MatrixApp() {
     <div className={motion === "reduce" ? "reduce-motion min-h-screen bg-ink text-ivory" : "min-h-screen bg-ink text-ivory"}>
       <div className="crest-rule" />
       <header className="sticky top-0 z-30 border-b border-line bg-ink">
-        <div className="mx-auto flex max-w-6xl flex-col gap-3 px-4 py-3">
+        <div className="mx-auto flex max-w-7xl flex-col gap-3 px-3 py-3 md:px-4">
           <div className="flex items-start justify-between gap-3">
             <div>
               <p className="text-xs font-semibold tracking-widest text-gold">
@@ -171,7 +174,8 @@ export function MatrixApp() {
           </nav>
         </div>
       </header>
-      <main className="mx-auto flex max-w-6xl flex-col gap-4 px-4 py-5">
+      <main className="mx-auto flex max-w-7xl flex-col gap-4 px-3 py-4 md:px-4">
+        {view === "matrix" && <LivingDeck />}
         {view === "overview" && <Overview />}
         {view === "zion" && <Zion />}
         {view === "grid" && <Grid />}
@@ -180,6 +184,7 @@ export function MatrixApp() {
         {view === "seals" && <Seals />}
         {view === "agents" && <Agents />}
         {view === "ledger" && <Ledger />}
+        {view === "boards" && <Blueprints />}
       </main>
     </div>
   );
@@ -267,7 +272,7 @@ function Overview() {
       </div>
       <Panel eyebrow="Design illustration" title="The blueprint is not the deployment">
         <img
-          src="/blueprint.jpg"
+          src="/blueprints/command.jpg"
           alt="Illustrated blueprint poster for the MWARINDIMWARI Matrix. Decorative only."
           className="w-full rounded-xl border border-line"
         />
@@ -276,6 +281,31 @@ function Overview() {
         </p>
       </Panel>
     </>
+  );
+}
+
+function Blueprints() {
+  const boards = [
+    ["/blueprints/command.jpg", "Command board", "The One Key, seven seals, realm matrix, and the Zimbabwe grid as drawn."],
+    ["/blueprints/system.jpg", "System blueprint", "Architecture, sacred texts, and a deployment map the console does not pretend to run."],
+    ["/blueprints/radiant.jpg", "Radiant seal", "Protection layer and global operations from the source art."],
+    ["/blueprints/crimson.jpg", "Crimson matrix", "The same living seal in the red register of the original boards."],
+  ] as const;
+  return (
+    <div className="flex flex-col gap-4">
+      <p className="text-sm leading-relaxed text-mist">
+        These four boards are the source. The living matrix keeps their names, numerals, provinces, and seals, and only lights what this browser can actually compute.
+      </p>
+      {boards.map(([src, title, copy]) => (
+        <figure key={src} className="overflow-hidden rounded-xl border border-line bg-panel">
+          <img src={src} alt="" className="w-full" />
+          <figcaption className="p-3">
+            <p className="font-display text-base">{title}</p>
+            <p className="text-sm text-mist">{copy}</p>
+          </figcaption>
+        </figure>
+      ))}
+    </div>
   );
 }
 
